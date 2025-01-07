@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from typing import Iterable, Self
 
 class ScrollableFrame(tk.Frame):
-    def __init__(self, parent):
-        super().__init__(parent)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         # Create a canvas
         self.canvas = tk.Canvas(self)
@@ -23,6 +23,7 @@ class ScrollableFrame(tk.Frame):
         # Pack the canvas and scrollbar
         self.canvas.pack(side = tk.LEFT, fill = tk.BOTH, expand = True)
         self.scrollbar.pack(side = tk.RIGHT, fill = tk.Y)
+        self.scrollable_frame.pack(fill = tk.X)
 
         self.canvas.configure(yscrollcommand = self.scrollbar.set)
 
@@ -121,6 +122,9 @@ class ListBox(ScrollableFrame):
     def create(self, title: str, text: str, tags: Iterable[str] = set()) -> None:
         widget = self.create_widget(title, text)
         new_item = Item(title, tags, widget)
+        self._create(new_item)
+    
+    def _create(self, new_item: Item) -> None:
         self.items.append(new_item)
         self.items.sort(key = lambda item: item.title)
 
