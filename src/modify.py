@@ -41,7 +41,7 @@ class Modify(tk.Toplevel):
 
     def apply(self):
         title = self.title_var.get()
-        text = self.text_entry.get("1.0", tk.END)
+        text = self.text_entry.get("1.0", tk.END).strip()
         tags = set(self.tags_var.get().split())
         self.callback(title, text, tags)
         self.destroy()

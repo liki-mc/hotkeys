@@ -60,8 +60,8 @@ class App:
         self.root.withdraw()  # Hide the window
 
     def run(self):
-        # Set up the hotkey (e.g., Ctrl + G)
-        keyboard.add_hotkey('ctrl+g', self.toggle_window)
+        # Set up the hotkey (e.g., Ctrl + H)
+        keyboard.add_hotkey('ctrl+h', self.toggle_window)
 
         # Start the Tkinter main loop
         self.root.mainloop()
@@ -83,12 +83,12 @@ class App:
         text = self.listbox.get_top().text
         self.search_entry.delete(0, tk.END)
         self.hide_window()
-        self.root.after(100, lambda: self.write(text))
+        self.root.after(10, lambda: self.write(text))
     
     def write(self, text):
         lines = text.split("\n")
         for line in lines[:-1]:
-            if line:
+            if len(line):
                 keyboard.write(line)
                 keyboard.press_and_release("shift+enter")
         
