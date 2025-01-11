@@ -1,37 +1,45 @@
 import tkinter as tk
 
 from dataclasses import dataclass
-from typing import Iterable, Self
+from typing import Iterable
 
 class ScrollableFrame(tk.Frame):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Create a canvas
-        self.canvas = tk.Canvas(self)
-        self.scrollbar = tk.Scrollbar(self, orient = "vertical", command = self.canvas.yview)
+        self.scrollbar = tk.Scrollbar(self, orient = tk.VERTICAL)
+        self.scrollbar.pack(side = tk.RIGHT, fill = tk.Y, expand = tk.FALSE)
+        self.canvas = tk.Canvas(self, bd = 0, 
+                                highlightthickness = 0, 
+                                yscrollcommand = self.scrollbar.set,
+                                width = 200, height = 300)
+        self.canvas.pack(side = tk.LEFT, fill = tk.BOTH, expand = tk.TRUE)
+        self.scrollbar.config(command = self.canvas.yview)
+
         self.scrollable_frame = tk.Frame(self.canvas)
+        self.scrollable_frame.bind("<Configure>", self._configure_scrollable_frame)
+        self.scrollable_frame_id = self.canvas.create_window(0, 0, window = self.scrollable_frame, anchor = tk.NW)
+        self.canvas.bind("<Configure>", self._configure_canvas)
 
-        # Configure the canvas
-        self.scrollable_frame.bind(
-            "<Configure>",
-            lambda e: self.canvas.configure(scrollregion = self.canvas.bbox("all"))
-        )
-
-        self.canvas.create_window((0, 0), window = self.scrollable_frame, anchor = "nw")
-
-        # Pack the canvas and scrollbar
-        self.canvas.pack(side = tk.LEFT, fill = tk.BOTH, expand = True)
-        self.scrollbar.pack(side = tk.RIGHT, fill = tk.Y)
-        self.scrollable_frame.pack(fill = tk.X)
-
-        self.canvas.configure(yscrollcommand = self.scrollbar.set)
-
-        # Bind mouse wheel event for scrolling
+        # Bind the mouse wheel event to the on_mouse_wheel method
         self.canvas.bind_all("<MouseWheel>", self.on_mouse_wheel)
+    
+    def _configure_scrollable_frame(self, event: tk.Event):
+        # Update the scrollregion of the canvas to encompass the frame
+        size = (self.scrollable_frame.winfo_reqwidth(), self.scrollable_frame.winfo_reqheight())
+        self.canvas.config(scrollregion = (0, 0, size[0], size[1]))
+        if self.scrollable_frame.winfo_reqwidth() != self.canvas.winfo_width():
+            # Update the canvas's width to fit the inner frame.
+            self.canvas.itemconfigure(self.scrollable_frame_id, width = self.canvas.winfo_width())
+    
+    def _configure_canvas(self, event: tk.Event):
+        if self.scrollable_frame.winfo_reqwidth() != self.canvas.winfo_width():
+            # Update the inner frame's width to fill the canvas.
+            self.canvas.itemconfigure(self.scrollable_frame_id, width = self.canvas.winfo_width())
 
-        # self.bind_all("a", lambda e: self.add_item(tk.Label(self.scrollable_frame, text = "New Item")))
-        # self.bind_all("r", lambda e: self.remove_item(self.scrollable_frame.winfo_children()[0]))
+    def on_frame_configure(self, event):
+        # Update the scrollregion of the canvas to encompass the frame
+        self.canvas.configure(scrollregion = self.canvas.bbox("all"))
 
     def on_mouse_wheel(self, event: tk.Event):
         # Scroll the canvas based on the mouse wheel movement
@@ -143,6 +151,7 @@ class ListBox(ScrollableFrame):
 def test_listbox():
     root = tk.Tk()
     root.title("ListBox Test")
+    root.geometry("400x400")
 
     listbox = ListBox(root)
 
@@ -151,6 +160,13 @@ def test_listbox():
     listbox.create("Itemdqsfqsdfqsdfqs 2", "This is the second item.", tags = ["second", "sample"])
     listbox.create("Item 3", "This is the third item.", tags = ["third", "demo"])
     listbox.create("Item 4", "This is the fourth item.", tags = ["fourth", "test"])
+    listbox.create("Item 5", "This is the fifth item.", tags = ["fifth", "trial"])
+    listbox.create("Item 6", "This is the sixth item.", tags = ["sixth", "experiment"])
+    listbox.create("Item 7", "This is the seventh item.", tags = ["seventh", "prototype"])
+    listbox.create("Item 8", "This is the eighth item.", tags = ["eighth", "pilot"])
+    listbox.create("Item 9", "This is the ninth item.", tags = ["ninth", "mockup"])
+    listbox.create("Item 10", "This is the tenth item.", tags = ["tenth", "model"])
+
 
     # Entry widget for filtering
     search_var = tk.StringVar()
