@@ -35,12 +35,10 @@ class App:
         self.root.withdraw()
     
     def __enter__(self):
-        print("Entering")
         self.listbox.__enter__()
         return self
 
     def __exit__(self, *args):
-        print("Exiting")
         self.listbox.__exit__(*args)
     
     def search(self, *_):
