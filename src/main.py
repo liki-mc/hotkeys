@@ -2,6 +2,7 @@ import tkinter as tk
 import keyboard
 
 from .scrollable_frame import ListBox
+from .modify import Add
 
 class App:
     def __init__(self):
@@ -18,16 +19,7 @@ class App:
         try:
             self.listbox.load("data/items.pkl")
         except FileNotFoundError:
-            self.listbox.create("Item 10", "This is the tenth item.", tags = ["tenth", "model"])
-            self.listbox.create("Item 1", "This is the first item.", tags = ["first", "example"])
-            self.listbox.create("Itemdqsfqsdfqsdfqs 2", "This is the second item.", tags = ["second", "sample"])
-            self.listbox.create("Item 3", "This is the third item.", tags = ["third", "demo"])
-            self.listbox.create("Item 4", "This is the fourth item.", tags = ["fourth", "test"])
-            self.listbox.create("Item 5", "This is the fifth item.", tags = ["fifth", "trial"])
-            self.listbox.create("Item 6", "This is the sixth item.", tags = ["sixth", "experiment"])
-            self.listbox.create("Item 7", "This is the seventh item.", tags = ["seventh", "prototype"])
-            self.listbox.create("Item 8", "This is the eighth item.", tags = ["eighth", "pilot"])
-            self.listbox.create("Item 9", "This is the ninth item.", tags = ["ninth", "mockup"])
+            pass
 
         # Entry widget for filtering
         self.search_var = tk.StringVar()
@@ -61,12 +53,26 @@ class App:
         self.root.mainloop()
     
     def on_enter(self, event):
-        if self.search_entry.get() in ["quit", "exit"]:
+        text = self.search_entry.get()
+        if text in ["quit", "exit"]:
             return self.exit()
+        
+        if text == "add":
+            return self.add()
+        
         text = self.listbox.get_top().text
         self.search_entry.delete(0, tk.END)
         self.hide_window()
         self.root.after(100, lambda: keyboard.write(text))
+    
+    def add(self):
+        def callback(title: str, text: str, tags: set[str]):
+            self.listbox.create(title, text, tags)
+        
+        add = Add(self.root, callback = callback)
+        add.transient(self.root)
+        add.grab_set()
+        add.wait_window()
     
     def exit(self):
         self.listbox.save("data/items.pkl")
