@@ -10,7 +10,7 @@ class Modify(tk.Toplevel):
     def __init__(self, *args, callback: Callable[[str, str, Optional[set[str]]], Any], window_title: Literal["Add", "Edit", "Modify"] = "Modify", title: str = "", text: str = "", tags: set[str] = set(), **kwargs):
         super().__init__(*args, **kwargs)
         self.title(window_title)
-        self.geometry("500x300")
+        self.geometry("500x500")
         self.callback = callback
 
         self.title_var = tk.StringVar(value = title)
@@ -21,9 +21,10 @@ class Modify(tk.Toplevel):
         self.title_entry.pack(fill = tk.X, padx = 5, pady = 5)
 
         tk.Label(self, text = "Text:").pack(anchor = tk.W)
-        self.text_entry = tkst.ScrolledText(self, wrap = tk.WORD, width = 40, height = 10)
+        self.text_entry = tkst.ScrolledText(self, wrap = tk.WORD, width = 40, height = 6)
         self.text_entry.insert(tk.INSERT, text)
         self.text_entry.pack(fill = tk.BOTH, padx = 5, pady = 5)
+        self.text_entry.bind("<Tab>", self.focus_next_widget)
 
         tk.Label(self, text = "Tags:").pack(anchor = tk.W)
         self.tags_entry = tk.Entry(self, textvariable = self.tags_var)
@@ -33,6 +34,10 @@ class Modify(tk.Toplevel):
         self.add_button.pack(pady = 10)
 
         self.title_entry.focus_set()
+    
+    def focus_next_widget(self, event: tk.Event) -> str:
+        event.widget.tk_focusNext().focus()
+        return "break"
 
     def apply(self):
         title = self.title_var.get()
