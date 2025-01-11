@@ -60,8 +60,8 @@ class App:
         self.root.withdraw()  # Hide the window
 
     def run(self):
-        # Set up the hotkey (e.g., Ctrl + Alt + G)
-        keyboard.add_hotkey('ctrl+alt+g', self.toggle_window)
+        # Set up the hotkey (e.g., Ctrl + G)
+        keyboard.add_hotkey('ctrl+g', self.toggle_window)
 
         # Start the Tkinter main loop
         self.root.mainloop()
@@ -103,6 +103,7 @@ class App:
         add.transient(self.root)
         add.grab_set()
         add.wait_window()
+        self.search_entry.delete(0, tk.END)
     
     def edit(self):
         item = self.listbox.get_top()
@@ -114,10 +115,12 @@ class App:
         edit.transient(self.root)
         edit.grab_set()
         edit.wait_window()
+        self.search_entry.delete(0, tk.END)
     
     def remove(self):
         item = self.listbox.get_top()
         self.listbox.remove(item.title)
+        self.search_entry.delete(0, tk.END)
     
     def exit(self):
         self.listbox.save("data/items.pkl")
