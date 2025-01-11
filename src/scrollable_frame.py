@@ -64,7 +64,7 @@ class ScrollableFrame(tk.Frame):
 
     def show_item(self, item: tk.Widget):
         # Re-add the item to the frame
-        item.pack(in_ = self.scrollable_frame, fill = tk.X)
+        item.pack(in_ = self.scrollable_frame)
 
 def test_scrollable_frame():
     root = tk.Tk()
@@ -107,6 +107,23 @@ class Item:
         self.tags = set([tag.lower() for tag in self.tags])
         self.tags.add(self.title)
 
+class Text(tk.Text):
+    normal = "normal"
+    bold = "bold"
+    title = "title"
+    def __init__(self, *args, title, text, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.tag_configure(Text.bold, font = ("Helvetica", 10, "bold"))
+        self.tag_configure(Text.normal, font = ("Helvetica", 10))
+        self.tag_configure(Text.title, font = ("Helvetica", 12, "bold"))
+
+        self.insert_text(f"{title}\n", Text.title)
+        self.insert_text(text, Text.normal)
+
+    def insert_text(self, text: str, tag: str = "normal"):
+        self.insert(tk.END, text, tag)
+
 class ListBox(ScrollableFrame):
     def __init__(self, parent: tk.Widget) -> None:
         super().__init__(parent)
@@ -114,18 +131,7 @@ class ListBox(ScrollableFrame):
         self.current_query = ""
     
     def create_widget(self, title: str, text: str) -> tk.Widget:
-        # frame = tk.Frame(self.scrollable_frame, bd = 2, relief = tk.RAISED, height = 100, width = self.scrollable_frame.winfo_width())
-        # frame.pack_propagate(False)
-
-        # title_label = tk.Label(frame, text = title, font = ("Helvetica", 10, "bold"))
-        # text_label = tk.Label(frame, text = text, wraplength = 200, anchor = tk.N)
-        
-        # title_label.pack(fill = tk.X, padx = 5, pady = 5)
-        # text_label.pack(fill = tk.X, padx = 5, pady = 5)
-        
-        # # frame.pack(fill = tk.X, padx = 5, pady = 5)
-        # return frame
-        return tk.Label(self.scrollable_frame, relief = tk.RAISED, text = title, font = ("Helvetica", 10, "bold"), height = 2)
+        return Text(self.scrollable_frame, title = title, text = text, relief = tk.RAISED, wrap = tk.WORD, height = 4)
     
     def create(self, title: str, text: str, tags: Iterable[str] = set()) -> None:
         widget = self.create_widget(title, text)
