@@ -132,7 +132,7 @@ class ListBox(ScrollableFrame):
         self.items: list[Item] = []
         self.current_query = ""
         self.filename = filename
-        
+
         if self.filename is not None:
             self.load(self.filename)
     
@@ -143,6 +143,29 @@ class ListBox(ScrollableFrame):
         widget = self.create_widget(title, text)
         new_item = Item(title, tags, widget, text)
         self._create(new_item)
+
+    def edit(self, current_title: str, new_title: str, new_text: str, new_tags: Iterable[str] = set()) -> None:
+        item = self.get(current_title)
+        if item is not None:
+            item.title = new_title
+            item.tags = set([tag.lower() for tag in new_tags])
+            item.tags.add(new_title)
+            item.text = new_text
+            item.widget.destroy()
+            item.widget = self.create_widget(new_title, new_text)
+            self._display()
+        
+        else:
+            raise ValueError(f"Item with title {current_title} not found.")
+    
+    def remove(self, title: str) -> None:
+        item = self.get(title)
+        if item is not None:
+            self.items.remove(item)
+            item.widget.destroy()
+            self._display()
+        else:
+            raise ValueError(f"Item with title {title} not found.")
     
     def _create(self, new_item: Item) -> None:
         self.items.append(new_item)

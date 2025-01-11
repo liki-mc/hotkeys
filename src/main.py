@@ -2,7 +2,7 @@ import tkinter as tk
 import keyboard
 
 from .scrollable_frame import ListBox
-from .modify import Add
+from .modify import Modify
 
 class App:
     def __init__(self):
@@ -30,13 +30,24 @@ class App:
         # Bind on enter
         self.search_entry.bind('<Return>', self.on_enter)
 
-        self.search_var.trace("w", lambda name, index, mode, sv = self.search_var: self.listbox.filter(sv.get()))
+        self.search_var.trace_add("write", self.search)
 
         # Bind the Esc key to hide the window
-        self.root.bind('<Escape>', lambda e: self.hide_window())
+        self.root.bind('<Escape>', lambda _: self.hide_window())
 
         # Initially hide the window
         self.root.withdraw()
+    
+    def search(self, *_):
+        text = self.search_var.get()
+        if text.startswith("edit"):
+            self.listbox.filter(text[5:])
+        
+        elif text.startswith("remove"):
+            self.listbox.filter(text[7:])
+        
+        else:
+            self.listbox.filter(self.search_var.get())
 
     def show_window(self):
         self.root.deiconify()  # Show the window
@@ -60,19 +71,46 @@ class App:
         if text == "add":
             return self.add()
         
+        if text.startswith("edit"):
+            return self.edit()
+        
+        if text.startswith("remove"):
+            return self.remove()
+        
         text = self.listbox.get_top().text
         self.search_entry.delete(0, tk.END)
         self.hide_window()
-        self.root.after(100, lambda: keyboard.write(text))
+        self.root.after(100, lambda: self.write(text))
+    
+    def write(self, text):
+        lines = text.split("\n")
+        for line in lines:
+            keyboard.write(line)
+            keyboard.press_and_release("shift+enter")
     
     def add(self):
         def callback(title: str, text: str, tags: set[str]):
             self.listbox.create(title, text, tags)
         
-        add = Add(self.root, callback = callback)
+        add = Modify(self.root, window_title = Modify.add, callback = callback)
         add.transient(self.root)
         add.grab_set()
         add.wait_window()
+    
+    def edit(self):
+        item = self.listbox.get_top()
+        def callback(title: str, text: str, tags: set[str]):
+            self.listbox.edit(item.title, title, text, tags)
+        
+        
+        edit = Modify(self.root, callback = callback, window_title = Modify.edit, title = item.title, text = item.text, tags = item.tags)
+        edit.transient(self.root)
+        edit.grab_set()
+        edit.wait_window()
+    
+    def remove(self):
+        item = self.listbox.get_top()
+        self.listbox.remove(item.title)
     
     def exit(self):
         self.listbox.save("data/items.pkl")
