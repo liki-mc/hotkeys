@@ -65,6 +65,7 @@ class App:
         text = self.listbox.get_top().text
         self.search_entry.delete(0, tk.END)
         self.hide_window()
+        self.root.after(100, lambda: keyboard.write(text))
 
     def toggle_window(self):
         if self.root.winfo_viewable():
