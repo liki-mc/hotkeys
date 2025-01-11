@@ -1,5 +1,6 @@
 import pickle
 import tkinter as tk
+from unidecode import unidecode
 
 from dataclasses import dataclass
 from typing import Iterable
@@ -106,8 +107,8 @@ class Item:
 
     def __post_init__(self):
         self.title = self.title.lower()
-        self.tags = set([tag.lower() for tag in self.tags])
-        self.tags.add(self.title)
+        self.tags = set([unidecode(tag.lower()) for tag in self.tags])
+        self.tags.add(unidecode(self.title))
 
 class Text(tk.Text):
     normal = "normal"
@@ -160,9 +161,9 @@ class ListBox(ScrollableFrame):
     def edit(self, current_title: str, new_title: str, new_text: str, new_tags: Iterable[str] = set()) -> None:
         item = self.get(current_title)
         if item is not None:
-            item.title = new_title
-            item.tags = set([tag.lower() for tag in new_tags])
-            item.tags.add(new_title)
+            item.title = new_title.lower()
+            item.tags = set([unidecode(tag.lower()) for tag in new_tags])
+            item.tags.add(unidecode(item.title))
             item.text = new_text
             item.widget.destroy()
             item.widget = self.create_widget(new_title, new_text)
@@ -193,7 +194,7 @@ class ListBox(ScrollableFrame):
             self.set_widgets(*[item.widget for item in self.items if [tag for tag in item.tags if self.current_query in tag]])
     
     def filter(self, query: str) -> None:
-        self.current_query = query.lower()
+        self.current_query = unidecode(query.lower())
         self._display()
     
     def get(self, title: str) -> Item:
