@@ -121,11 +121,15 @@ class Text(tk.Text):
         self.tag_configure(Text.normal, font = ("Helvetica", 10))
         self.tag_configure(Text.title, font = ("Helvetica", 12, "bold"))
 
-        self.insert_text(f"{title}\n", Text.title)
-        self.insert_text(text, Text.normal)
+        self.insert(tk.END, f"{title}\n", Text.title)
+        self.insert(tk.END, text, Text.normal)
+
+        self.config(state = tk.DISABLED)
 
     def insert_text(self, text: str, tag: str = "normal"):
+        self.config(state = tk.NORMAL)
         self.insert(tk.END, text, tag)
+        self.config(state = tk.DISABLED)
 
 class ListBox(ScrollableFrame):
     def __init__(self, *args, filename = None, **kwargs) -> None:
