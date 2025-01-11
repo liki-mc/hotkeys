@@ -5,7 +5,7 @@ from .scrollable_frame import ListBox
 from .modify import Modify
 
 class App:
-    def __init__(self):
+    def __init__(self, filename: str = "data/items.pkl"):
         self.root = tk.Tk()
         self.root.title("Hotkeys")
         self.root.geometry("900x600")
@@ -15,11 +15,7 @@ class App:
         self.root.protocol("WM_DELETE_WINDOW", self.hide_window)
 
         
-        self.listbox = ListBox(self.root)
-        try:
-            self.listbox.load("data/items.pkl")
-        except FileNotFoundError:
-            pass
+        self.listbox = ListBox(self.root, filename = filename)
 
         # Entry widget for filtering
         self.search_var = tk.StringVar()
@@ -37,6 +33,15 @@ class App:
 
         # Initially hide the window
         self.root.withdraw()
+    
+    def __enter__(self):
+        print("Entering")
+        self.listbox.__enter__()
+        return self
+
+    def __exit__(self, *args):
+        print("Exiting")
+        self.listbox.__exit__(*args)
     
     def search(self, *_):
         text = self.search_var.get()
@@ -84,9 +89,13 @@ class App:
     
     def write(self, text):
         lines = text.split("\n")
-        for line in lines:
-            keyboard.write(line)
-            keyboard.press_and_release("shift+enter")
+        for line in lines[:-1]:
+            if line:
+                keyboard.write(line)
+                keyboard.press_and_release("shift+enter")
+        
+        if lines[-1]:
+            keyboard.write(lines[-1])
     
     def add(self):
         def callback(title: str, text: str, tags: set[str]):
@@ -126,5 +135,5 @@ class App:
         self.root.after(50, self.check)
 
 if __name__ == "__main__":
-    app = App()
-    app.run()
+    with App() as app:
+        app.run()

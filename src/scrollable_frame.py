@@ -133,8 +133,21 @@ class ListBox(ScrollableFrame):
         self.current_query = ""
         self.filename = filename
 
+    def __enter__(self):
         if self.filename is not None:
             self.load(self.filename)
+        return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.filename is not None:
+            self.save(self.filename)
+
+        if exc_type is not None:
+            print(f"Exception type: {exc_type}")
+            print(f"Exception value: {exc_value}")
+            print(f"Traceback: {traceback}")
+            return False  # Propagate the exception
+        return True
     
     def create_widget(self, title: str, text: str) -> tk.Widget:
         return Text(self.scrollable_frame, title = title, text = text, relief = tk.RAISED, wrap = tk.WORD, height = 4)
