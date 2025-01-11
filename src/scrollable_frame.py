@@ -1,3 +1,4 @@
+import pickle
 import tkinter as tk
 
 from dataclasses import dataclass
@@ -126,10 +127,14 @@ class Text(tk.Text):
         self.insert(tk.END, text, tag)
 
 class ListBox(ScrollableFrame):
-    def __init__(self, parent: tk.Widget) -> None:
-        super().__init__(parent)
+    def __init__(self, *args, filename = None, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.items: list[Item] = []
         self.current_query = ""
+        self.filename = filename
+        
+        if self.filename is not None:
+            self.load(self.filename)
     
     def create_widget(self, title: str, text: str) -> tk.Widget:
         return Text(self.scrollable_frame, title = title, text = text, relief = tk.RAISED, wrap = tk.WORD, height = 4)
@@ -163,6 +168,19 @@ class ListBox(ScrollableFrame):
             return [item for item in self.items][0]
         else:
             return [item for item in self.items if [tag for tag in item.tags if self.current_query in tag]][0]
+    
+    def save(self, filename: str) -> None:
+        with open(filename, "wb") as file:
+            pickle.dump([(item.title, item.text, item.tags) for item in self.items], file)
+    
+    def load(self, filename: str) -> None:
+        with open(filename, "rb") as file:
+            items = pickle.load(file)
+        
+        self.items = [Item(title, tags, self.create_widget(title, text), text) for title, text, tags in items]
+        self.items.sort(key = lambda item: item.title)
+
+        self._display()
     
 
 def test_listbox():
