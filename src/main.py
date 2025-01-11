@@ -33,6 +33,9 @@ class App:
         self.search_entry.pack(pady = 10, padx = 10, fill = tk.X)
         self.listbox.pack(fill = tk.BOTH, expand = True)
 
+        # Bind on enter
+        self.search_entry.bind('<Return>', self.on_enter)
+
         self.search_var.trace("w", lambda name, index, mode, sv = self.search_var: self.listbox.filter(sv.get()))
 
         # Bind the Esc key to hide the window
@@ -54,6 +57,14 @@ class App:
 
         # Start the Tkinter main loop
         self.root.mainloop()
+    
+    def on_enter(self, event):
+        if self.search_entry.get() in ["quit", "exit"]:
+            self.root.quit()
+            return
+        text = self.listbox.get_top().text
+        self.search_entry.delete(0, tk.END)
+        self.hide_window()
 
     def toggle_window(self):
         if self.root.winfo_viewable():

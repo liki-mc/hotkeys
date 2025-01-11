@@ -101,6 +101,7 @@ class Item:
     title: str
     tags: set[str]
     widget: tk.Widget
+    text: str = ""
 
     def __post_init__(self):
         self.title = self.title.lower()
@@ -135,7 +136,7 @@ class ListBox(ScrollableFrame):
     
     def create(self, title: str, text: str, tags: Iterable[str] = set()) -> None:
         widget = self.create_widget(title, text)
-        new_item = Item(title, tags, widget)
+        new_item = Item(title, tags, widget, text)
         self._create(new_item)
     
     def _create(self, new_item: Item) -> None:
@@ -153,6 +154,16 @@ class ListBox(ScrollableFrame):
     def filter(self, query: str) -> None:
         self.current_query = query.lower()
         self._display()
+    
+    def get(self, title: str) -> Item:
+        return next((item for item in self.items if item.title == title), None)
+
+    def get_top(self) -> Item:
+        if not self.current_query:
+            return [item for item in self.items][0]
+        else:
+            return [item for item in self.items if [tag for tag in item.tags if self.current_query in tag]][0]
+    
 
 def test_listbox():
     root = tk.Tk()
