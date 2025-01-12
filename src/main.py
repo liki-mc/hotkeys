@@ -1,5 +1,6 @@
 import tkinter as tk
 import keyboard
+import screeninfo
 
 from .scrollable_frame import ListBox
 from .modify import Modify
@@ -53,6 +54,32 @@ class App:
             self.listbox.filter(self.search_var.get())
 
     def show_window(self):
+        # Get the current mouse position
+        mouse_x = self.root.winfo_pointerx()
+        mouse_y = self.root.winfo_pointery()
+
+        # Calculate the desired position of the window
+        window_width = self.root.winfo_width()
+        window_height = self.root.winfo_height()
+        x = mouse_x - window_width // 4
+        y = mouse_y - window_height // 4
+
+        # Position on the screen
+        for monitor in screeninfo.get_monitors():
+            if monitor.x <= mouse_x <= monitor.x + monitor.width:
+                if x < monitor.x:
+                    x = monitor.x
+                elif x + window_width > monitor.x + monitor.width:
+                    x = monitor.x + monitor.width - window_width
+            
+            if monitor.y <= mouse_y <= monitor.y + monitor.height:
+                if y < monitor.y:
+                    y = monitor.y
+                elif y + window_height > monitor.y + monitor.height:
+                    y = monitor.y + monitor.height - window_height
+
+        # Set the position of the root window
+        self.root.geometry(f"+{x}+{y}")
         self.root.deiconify()  # Show the window
         self.search_entry.focus_set()
 
