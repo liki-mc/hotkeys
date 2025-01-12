@@ -3,7 +3,7 @@ import tkinter as tk
 from unidecode import unidecode
 
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Iterable, Optional
 
 class ScrollableFrame(tk.Frame):
     def __init__(self, *args, **kwargs):
@@ -102,8 +102,9 @@ def test_scrollable_frame():
 class Item:
     title: str
     tags: set[str]
-    widget: tk.Widget
+    widget: Optional[tk.Widget] = None
     text: str = ""
+    priority: int = 10
 
     def __post_init__(self):
         self.title = self.title.lower()
@@ -157,20 +158,22 @@ class ListBox(ScrollableFrame):
     def create_widget(self, title: str, text: str) -> tk.Widget:
         return Text(self.scrollable_frame, title = title, text = text, relief = tk.RAISED, wrap = tk.WORD, height = 4)
     
-    def create(self, title: str, text: str, tags: Iterable[str] = set()) -> None:
+    def create(self, title: str, text: str, tags: Iterable[str] = set(), priority: int = 10) -> None:
         widget = self.create_widget(title, text)
-        new_item = Item(title, tags, widget, text)
+        new_item = Item(title, tags, widget, text, priority)
         self._create(new_item)
 
-    def edit(self, current_title: str, new_title: str, new_text: str, new_tags: Iterable[str] = set()) -> None:
+    def edit(self, current_title: str, new_title: str, new_text: str, new_tags: Iterable[str] = set(), priority: int = 10) -> None:
         item = self.get(current_title)
         if item is not None:
             item.title = new_title.lower()
             item.tags = set([unidecode(tag.lower()) for tag in new_tags])
             item.tags.add(unidecode(item.title))
             item.text = new_text
+            item.priority = priority
             item.widget.destroy()
             item.widget = self.create_widget(new_title, new_text)
+            self.items.sort(key = lambda item: (item.priority, item.title))
             self._display()
         
         else:
@@ -187,7 +190,7 @@ class ListBox(ScrollableFrame):
     
     def _create(self, new_item: Item) -> None:
         self.items.append(new_item)
-        self.items.sort(key = lambda item: item.title)
+        self.items.sort(key = lambda item: (item.priority, item.title))
 
         self._display()
     
@@ -212,14 +215,14 @@ class ListBox(ScrollableFrame):
     
     def save(self, filename: str) -> None:
         with open(filename, "wb") as file:
-            pickle.dump([(item.title, item.text, item.tags) for item in self.items], file)
+            pickle.dump([(item.title, item.text, item.tags, item.priority) for item in self.items], file)
     
     def load(self, filename: str) -> None:
         with open(filename, "rb") as file:
             items = pickle.load(file)
         
-        self.items = [Item(title, tags, self.create_widget(title, text), text) for title, text, tags in items]
-        self.items.sort(key = lambda item: item.title)
+        self.items = [Item(title, tags, self.create_widget(title, text), text, priority) for title, text, tags, priority in items]
+        self.items.sort(key = lambda item: (item.priority, item.title))
 
         self._display()
     
