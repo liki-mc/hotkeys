@@ -30,7 +30,7 @@ class App:
         self.search_var.trace_add("write", self.search)
 
         # Bind the Esc key to hide the window
-        self.root.bind('<Escape>', lambda _: self.hide_window())
+        self.root.bind('<Escape>', lambda _: self.search_entry.delete(0, tk.END) or self.hide_window())
 
         # Initially hide the window
         self.root.withdraw()
@@ -123,10 +123,8 @@ class App:
             keyboard.write(lines[-1])
     
     def add(self):
-        def callback(title: str, text: str, tags: set[str]):
-            self.listbox.create(title, text, tags)
-        
-        add = Modify(self.root, window_title = Modify.add, callback = callback)
+        add = Modify(self.root, window_title = Modify.add, callback = self.listbox.create)
+
         add.transient(self.root)
         add.geometry(f"+{self.root.winfo_x() + 50}+{self.root.winfo_y() + 50}")
         add.grab_set()
@@ -135,11 +133,9 @@ class App:
     
     def edit(self):
         item = self.listbox.get_top()
-        def callback(title: str, text: str, tags: set[str]):
-            self.listbox.edit(item.title, title, text, tags)
         
-        
-        edit = Modify(self.root, callback = callback, window_title = Modify.edit, title = item.title, text = item.text, tags = item.tags)
+        edit = Modify(self.root, callback = lambda *args: self.listbox.edit(item.title, *args), window_title = Modify.edit, item = item)
+
         edit.transient(self.root)
         edit.geometry(f"+{self.root.winfo_x() + 50}+{self.root.winfo_y() + 50}")
         edit.grab_set()
