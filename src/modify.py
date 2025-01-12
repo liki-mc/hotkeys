@@ -30,7 +30,7 @@ class Modify(tk.Toplevel):
         self.tags_entry = tk.Entry(self, textvariable = self.tags_var)
         self.tags_entry.pack(fill = tk.X, padx = 5, pady = 5)
 
-        self.add_button = tk.Button(self, text = "Add", command = self.apply)
+        self.add_button = tk.Button(self, text = "Save", command = self.apply)
         self.add_button.pack(pady = 10)
 
         self.title_entry.focus_set()

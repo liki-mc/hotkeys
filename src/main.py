@@ -60,8 +60,8 @@ class App:
         self.root.withdraw()  # Hide the window
 
     def run(self):
-        # Set up the hotkey (e.g., Ctrl + H)
-        keyboard.add_hotkey('ctrl+h', self.toggle_window)
+        # Set up the hotkey (e.g., Ctrl + G)
+        keyboard.add_hotkey('ctrl+y', self.toggle_window)
 
         # Start the Tkinter main loop
         self.root.mainloop()
@@ -101,6 +101,7 @@ class App:
         
         add = Modify(self.root, window_title = Modify.add, callback = callback)
         add.transient(self.root)
+        add.geometry(f"+{self.root.winfo_x() + 50}+{self.root.winfo_y() + 50}")
         add.grab_set()
         add.wait_window()
         self.search_entry.delete(0, tk.END)
@@ -113,6 +114,7 @@ class App:
         
         edit = Modify(self.root, callback = callback, window_title = Modify.edit, title = item.title, text = item.text, tags = item.tags)
         edit.transient(self.root)
+        edit.geometry(f"+{self.root.winfo_x() + 50}+{self.root.winfo_y() + 50}")
         edit.grab_set()
         edit.wait_window()
         self.search_entry.delete(0, tk.END)
