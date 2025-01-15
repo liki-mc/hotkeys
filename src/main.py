@@ -2,8 +2,9 @@ import tkinter as tk
 import keyboard
 import screeninfo
 
-from .scrollable_frame import ListBox
+from .config import ConfigWindow
 from .modify import Modify
+from .scrollable_frame import ListBox
 
 class App:
     def __init__(self, filename: str = "data/items.pkl"):
@@ -34,12 +35,17 @@ class App:
 
         # Initially hide the window
         self.root.withdraw()
+
+        # load config
+        self.config = ConfigWindow(self)
+        self.config.withdraw()
     
     def __enter__(self):
         self.listbox.__enter__()
         return self
 
     def __exit__(self, *args):
+        self.config.save()
         self.listbox.__exit__(*args)
     
     def search(self, *_):
@@ -87,9 +93,6 @@ class App:
         self.root.withdraw()  # Hide the window
 
     def run(self):
-        # Set up the hotkey (e.g., Ctrl + G)
-        keyboard.add_hotkey('ctrl+y', self.toggle_window)
-
         # Start the Tkinter main loop
         self.root.mainloop()
     
@@ -106,6 +109,10 @@ class App:
         
         if text.startswith("remove"):
             return self.remove()
+
+        if text == "config":
+            self.config.show()
+            return
 
         try:
             text = self.listbox.get_top().text
