@@ -4,6 +4,7 @@ import keyboard
 import pickle
 import tkinter as tk
 
+from tkinter import font
 from tkinter import messagebox
 
 
@@ -21,13 +22,11 @@ class ConfigWindow(tk.Toplevel):
     def __init__(self, app: App, *args, filename: str = "data/config.pkl", **kwargs):
         super().__init__(*args, **kwargs)
         self.title("Configuration")
-        self.geometry("500x500")
+        self.geometry("250x400")
         self.app = app
         
         self.protocol("WM_DELETE_WINDOW", self.withdraw)
 
-        self.add_button = tk.Button(self, text = "Save", command = lambda *_: self.save() or self.withdraw())
-        self.add_button.pack(pady = 10)
         self.filename = filename
         try:
             if filename:
@@ -39,14 +38,35 @@ class ConfigWindow(tk.Toplevel):
 
         except FileNotFoundError:
             self.config = Config()
+        
+        
+        default_font = font.nametofont("TkDefaultFont")
+        default_font.configure(size=12) 
+
 
         self.recording = False
-        self.record_button = tk.Button(self, text = "Start Recording", command = self.start_recording)
-        self.record_button.pack(pady = 10)
-
         self.first_key_hook : Optional[function] = None
 
+        self.hotkey_label = tk.Label(self, text = "Hotkey")
+        self.hotkey_label.pack(pady = 5)
+        self.hotkey_frame = tk.Frame(self)
+        self.hotkey_frame.pack(pady = 5)
+        self.display_hotkey()
+        self.add_button = tk.Button(self, text = "Save", command = lambda *_: self.save() or self.withdraw())
+        self.add_button.pack(pady = 10)
+
         self.apply_settings()
+    
+    def display_hotkey(self):
+        for widget in self.hotkey_frame.winfo_children():
+            widget.destroy()
+            
+        for key in self.config.hotkey.split("+"):
+            label = tk.Label(self.hotkey_frame, text = key, border = 2, relief = tk.RIDGE)
+            label.pack(side = tk.LEFT, pady = 5, anchor = tk.CENTER)
+        self.hotkey_button = tk.Button(self.hotkey_frame, text = "Record hotkey", command = self.start_recording)
+        self.hotkey_button.pack(pady = 5, side = tk.RIGHT)
+
     
     def apply_settings(self):
         # Set up the hotkey (e.g., Ctrl + Y)
@@ -59,7 +79,7 @@ class ConfigWindow(tk.Toplevel):
 
     def start_recording(self):
         self.recording = True
-        self.record_button.config(text = "Stop Recording", command = self.stop_recording)
+        self.hotkey_button.config(text = "Stop Recording", command = self.stop_recording)
         keyboard.start_recording()
         self.first_key_hook = keyboard.hook(self.record_first_key)
 
@@ -67,12 +87,10 @@ class ConfigWindow(tk.Toplevel):
         if self.recording:
             self.recording = False
             recorded = keyboard.stop_recording()
-            self.record_button.config(text = "Start Recording", command = self.start_recording)
+            self.hotkey_button.config(text = "Record hotkey", command = self.start_recording)
             keyboard.unhook_all()
             self.set_hotkey(recorded)
-            print(recorded)
-            print(set((key.name, keyboard.is_modifier(key.name)) for key in recorded))
-    
+        
     def set_hotkey(self, recorded: list[keyboard.KeyboardEvent]):
         keys = set((key.name, keyboard.is_modifier(key.name)) for key in recorded)
         has_non_modifier = False
@@ -89,9 +107,10 @@ class ConfigWindow(tk.Toplevel):
                 has_non_modifier = True
         
         self.config.hotkey = hotkey
-        print("new hotkey:", hotkey)
+        # print("new hotkey:", hotkey)
         self.save()
         self.apply_settings()
+        self.display_hotkey()
 
     def record_first_key(self, event: keyboard.KeyboardEvent):
         if self.first_key_hook:
