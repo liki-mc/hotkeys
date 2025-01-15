@@ -106,11 +106,16 @@ class App:
         
         if text.startswith("remove"):
             return self.remove()
+
+        try:
+            text = self.listbox.get_top().text
+            self.search_entry.delete(0, tk.END)
+            self.hide_window()
+            self.root.after(10, lambda: self.write(text))
         
-        text = self.listbox.get_top().text
-        self.search_entry.delete(0, tk.END)
-        self.hide_window()
-        self.root.after(10, lambda: self.write(text))
+        except IndexError:
+            self.search_entry.delete(0, tk.END)
+            self.hide_window()
     
     def write(self, text):
         lines = text.split("\n")

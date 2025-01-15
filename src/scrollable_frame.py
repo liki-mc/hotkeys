@@ -140,8 +140,12 @@ class ListBox(ScrollableFrame):
         self.filename = filename
 
     def __enter__(self):
-        if self.filename is not None:
-            self.load(self.filename)
+        try:
+            if self.filename is not None:
+                self.load(self.filename)
+        
+        except FileNotFoundError:
+            pass
         return self
     
     def __exit__(self, exc_type, exc_value, traceback):
