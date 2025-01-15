@@ -60,7 +60,7 @@ class ConfigWindow(tk.Toplevel):
     def display_hotkey(self):
         for widget in self.hotkey_frame.winfo_children():
             widget.destroy()
-            
+
         for key in self.config.hotkey.split("+"):
             label = tk.Label(self.hotkey_frame, text = key, border = 2, relief = tk.RIDGE)
             label.pack(side = tk.LEFT, pady = 5, anchor = tk.CENTER)
@@ -119,6 +119,7 @@ class ConfigWindow(tk.Toplevel):
         keyboard.on_release_key(event.name, self.stop_recording)
     
     def show(self):
+        self.geometry(f"+{self.app.root.winfo_x() + 50}+{self.app.root.winfo_y() + 50}")
         self.deiconify()
         self.lift()
 
