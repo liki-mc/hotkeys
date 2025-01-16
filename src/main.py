@@ -27,7 +27,7 @@ class App:
 
         # Bind on enter
         self.search_entry.bind('<Return>', self.on_enter)
-
+        self.search_entry.bind('<Control-BackSpace>', self.ctrl_backspace)
         self.search_var.trace_add("write", self.search)
 
         # Bind the Esc key to hide the window
@@ -47,6 +47,22 @@ class App:
     def __exit__(self, *args):
         self.config.save()
         self.listbox.__exit__(*args)
+    
+    def ctrl_backspace(self, event: tk.Event):
+        entry = event.widget
+        if not isinstance(entry, tk.Entry):
+            return
+        cursor_pos = entry.index(tk.INSERT)
+        text = entry.get()
+        if cursor_pos == 0:
+            return
+        # Find the position of the previous word
+        new_pos = text.rfind(' ', 0, cursor_pos)
+        if new_pos == -1:
+            new_pos = 0
+        else:
+            new_pos += 2
+        entry.delete(new_pos, cursor_pos)
     
     def search(self, *_):
         text = self.search_var.get()
