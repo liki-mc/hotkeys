@@ -112,7 +112,7 @@ class App:
         # Start the Tkinter main loop
         self.root.mainloop()
     
-    def on_enter(self, event):
+    def on_enter(self, event: tk.Event):
         text = self.search_entry.get()
         if text in ["quit", "exit"]:
             return self.exit()
@@ -140,7 +140,7 @@ class App:
             self.search_entry.delete(0, tk.END)
             self.hide_window()
     
-    def write(self, text):
+    def write(self, text: str):
         lines = text.split("\n")
         for line in lines[:-1]:
             if len(line):
